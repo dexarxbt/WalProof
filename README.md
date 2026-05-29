@@ -2,7 +2,7 @@
   <img src="./public/walproof-web/assets/walproof-logo-cropped.png" alt="WalProof logo" width="260" />
 </p>
 
-<h1 align="center">WalProof</h1>
+<h1 align="center"></h1>
 
 <p align="center">
   <strong>Proof before payout.</strong>
