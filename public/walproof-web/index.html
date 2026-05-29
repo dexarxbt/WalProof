@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WalProof — Proof Before Payout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        heading: ["Instrument Serif", "serif"],
+        body: ["Barlow", "sans-serif"],
+        mono: ["Barlow", "sans-serif"],
+        metric: ["Instrument Serif", "serif"]
+      },
+      colors: {
+        navy: "#07111F",
+        midnight: "#0B1B33",
+        royal: "#155EEF",
+        electric: "#2F80FF",
+        ice: "#BFE3FF",
+        soft: "#F4F8FF",
+        mist: "#D8E4F2",
+        slateText: "#8EA4BF",
+        success: "#3DDC97",
+        amber: "#F7B955",
+        danger: "#FF5C7A"
+      },
+      boxShadow: {
+        glow: "0 30px 80px rgba(21,94,239,0.28)",
+        soft: "0 18px 55px rgba(0,0,0,0.28)",
+        card: "0 20px 70px rgba(47,128,255,0.12)"
+      }
+    }
+  }
+}
+</script>
+<style>
+  :root {
+    color-scheme: dark;
+    --line: rgba(255,255,255,.12);
+    --panel: rgba(11,27,51,.68);
+    --panel-2: rgba(7,17,31,.82);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Barlow, sans-serif;
+    background:
+      radial-gradient(circle at 72% 8%, rgba(47,128,255,.22), transparent 34rem),
+      radial-gradient(circle at 18% 92%, rgba(191,227,255,.12), transparent 34rem),
+      linear-gradient(135deg, #07111F 0%, #0B1B33 42%, #030812 100%);
+    color: #F4F8FF;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(191,227,255,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(191,227,255,.035) 1px, transparent 1px);
+    background-size: 76px 76px;
+    mask-image: linear-gradient(to bottom, black, transparent 72%);
+    z-index: -3;
+  }
+  .bg-walrus {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -4;
+    background:
+      linear-gradient(180deg, rgba(7,17,31,.42), rgba(7,17,31,.94)),
+      url("./assets/proof-room-wide.png") center / cover no-repeat;
+    opacity: .5;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.22) 54%, #000 100%),
+      url("./assets/vault-dark.png") center / cover no-repeat;
+    animation: imageDrift 26s ease-in-out infinite alternate;
+  }
+  .glass {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 18px 60px rgba(0,0,0,.22);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+  }
+  .liquid-glass {
+    background: rgba(255,255,255,0.01);
+    background-blend-mode: luminosity;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: none;
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+  .liquid-glass::before {
+    content: "";
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    padding: 1.4px;
+    background: linear-gradient(180deg,
+      rgba(255,255,255,0.45) 0%,
+      rgba(255,255,255,0.15) 20%,
+      rgba(255,255,255,0) 40%,
+      rgba(255,255,255,0) 60%,
+      rgba(255,255,255,0.15) 80%,
+      rgba(255,255,255,0.45) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  .liquid-glass-strong {
+    background: rgba(255,255,255,0.01);
+    background-blend-mode: luminosity;
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
+    border: none;
+    box-shadow: 4px 4px 4px rgba(0,0,0,0.05), inset 0 1px 1px rgba(255,255,255,0.15);
+    position: relative;
+    overflow: hidden;
+  }
+  .liquid-glass-strong::before {
+    content: "";
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    padding: 1.4px;
+    background: linear-gradient(180deg,
+      rgba(255,255,255,0.5) 0%,
+      rgba(255,255,255,0.2) 20%,
+      rgba(255,255,255,0) 40%,
+      rgba(255,255,255,0) 60%,
+      rgba(255,255,255,0.2) 80%,
+      rgba(255,255,255,0.5) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  .glass-strong {
+    background: var(--panel-2);
+    border: 1px solid rgba(255,255,255,.14);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.09), 0 30px 90px rgba(0,0,0,.34);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+  }
+  .white-card {
+    background:
+      linear-gradient(135deg, rgba(255,255,255,.13), rgba(191,227,255,.045)),
+      radial-gradient(circle at 50% 0%, rgba(191,227,255,.16), transparent 30rem);
+    color: #F4F8FF;
+    border: 1px solid rgba(255,255,255,.16);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 24px 80px rgba(21,94,239,.18);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+  }
+  .btn {
+    height: 48px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    padding: 0 1.05rem;
+    font-size: .9rem;
+    font-weight: 700;
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(0); }
+  .btn:focus-visible { outline: 2px solid #BFE3FF; outline-offset: 3px; }
+  .btn-primary {
+    color: white;
+    background: linear-gradient(135deg, #155EEF, #2F80FF);
+    box-shadow: 0 16px 40px rgba(47,128,255,.34);
+  }
+  .btn-secondary {
+    color: white;
+    background: rgba(255,255,255,.055);
+    border: 1px solid rgba(255,255,255,.14);
+  }
+  .btn-success { color: #07111F; background: linear-gradient(135deg, #3DDC97, #9fffd5); }
+  .btn-danger { color: #ffdbe3; background: rgba(255,92,122,.10); border: 1px solid rgba(255,92,122,.24); }
+  .premium-frame {
+    border-radius: 2rem;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.04);
+    box-shadow: 0 30px 80px rgba(21,94,239,.28);
+  }
+  .premium-frame::before {
+    content: "";
+    position: absolute;
+    inset: -24px;
+    background: radial-gradient(circle at 55% 48%, rgba(47,128,255,.34), transparent 40%);
+    z-index: -1;
+    filter: blur(24px);
+  }
+  .card-hover { transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease, background .25s ease; }
+  .card-hover:hover { transform: translateY(-5px); border-color: rgba(191,227,255,.28); box-shadow: 0 24px 80px rgba(47,128,255,.16); }
+  .logo-shell {
+    background: rgba(244,248,255,.90);
+    border-color: rgba(255,255,255,.62);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.72), 0 12px 36px rgba(255,255,255,.10);
+  }
+  .logo-img { object-fit: contain; filter: drop-shadow(0 12px 24px rgba(0,0,0,.28)); }
+  .mono-pill { font-family: Barlow, sans-serif; }
+  .pulse-once { animation: pulseOnce 2.8s ease-in-out infinite; }
+  .scan {
+    position: relative;
+    overflow: hidden;
+  }
+  .scan::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -30%;
+    height: 28%;
+    background: linear-gradient(to bottom, transparent, rgba(191,227,255,.13), transparent);
+    animation: scanDown 5.6s cubic-bezier(.2,.9,.25,1) infinite;
+    pointer-events: none;
+  }
+  .toast {
+    animation: toastIn .22s ease both;
+  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
+  @keyframes imageDrift {
+    from { transform: scale(1.02) translate3d(0,0,0); filter: saturate(1.02); }
+    to { transform: scale(1.075) translate3d(-2.2%, -1.2%, 0); filter: saturate(1.14); }
+  }
+  @keyframes pulseOnce {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(47,128,255,0); }
+    50% { box-shadow: 0 0 0 5px rgba(47,128,255,.13); }
+  }
+  @keyframes scanDown {
+    0%, 45% { transform: translateY(0); opacity: 0; }
+    52% { opacity: 1; }
+    100% { transform: translateY(560%); opacity: 0; }
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (max-width: 640px) {
+    .btn { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/framer-motion@10.18.0/dist/framer-motion.js"></script>
+<script type="text/babel">
+const { useEffect, useMemo, useState } = React;
+const motion = window.Motion?.motion || {};
+const MDiv = motion.div || "div";
+const MSection = motion.section || "section";
+const A = (file) => `./assets/${file}`;
+
+const routes = [
+  ["/", "Product"],
+  ["/dashboard", "Dashboard"],
+  ["/grants/new", "Create"],
+  ["/grants/demo", "Grant"],
+  ["/grants/demo/milestones/2/submit", "Submit"],
+  ["/review", "Review"],
+  ["/proof/demo-proof", "Proof"],
+  ["/status", "Status"],
+];
+
+const demo = {
+  grant: "Walrus Evidence SDK Grant",
+  milestone: "Walrus Storage Integration",
+  sponsor: "Tatum x Walrus Ecosystem",
+  builder: "Northstar Labs",
+  funding: "$2,000",
+  milestoneFunding: "$700",
+  wallet: "0x4ac9...91ef",
+  tx: "0x82f4...aa19",
+  object: "0x7b12...e4d0",
+  package: "0x9f31...c0a7",
+  packet: "walrus_blob_9Bs1...M03",
+  hash: "sha256:8f31c0...92ab",
+  progress: 67,
+};
+
+const grants = [
+  ["Walrus Evidence SDK Grant", "Tatum x Walrus Ecosystem", "Northstar Labs", "$2,000", "Under Review", 67, 12],
+  ["Sui GrantOps Registry", "Sui Builder House", "Index Harbor", "$6,500", "Approved", 82, 31],
+  ["DAO Proof Portal", "Move Commons", "Civic Graph", "$4,200", "Active", 43, 18],
+];
+
+const exhibits = [
+  ["A", "Walrus Upload Demo", "Video", "84.2 MB", "walrus_blob_8xA4...91F", "Stored on Walrus"],
+  ["B", "Architecture Diagram", "Image", "2.1 MB", "walrus_blob_7Qp2...L18", "Stored on Walrus"],
+  ["C", "Sui Transaction Screenshot", "Image", "1.6 MB", "walrus_blob_2Df9...K44", "Stored on Walrus"],
+  ["D", "README Proof Packet", "JSON", "18 KB", "walrus_blob_9Bs1...M03", "Verified"],
+];
+
+const milestones = [
+  ["MVP Prototype", "$500", "Approved", 100],
+  ["Walrus Storage Integration", "$700", "Under Review", 67],
+  ["Public Demo + Docs", "$800", "In Progress", 34],
+];
+
+const timeline = [
+  "Grant room created",
+  "Milestone submitted",
+  "Evidence uploaded to Walrus",
+  "Proof packet stored",
+  "Sui record registered",
+  "Sponsor reviewed",
+  "Verdict pending",
+];
+
+function Icon({ name, className = "" }) {
+  const props = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.9, strokeLinecap: "round", strokeLinejoin: "round", className };
+  const p = {
+    copy: [<rect x="9" y="9" width="13" height="13" rx="2"/>, <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>],
+    external: [<path d="M15 3h6v6"/>, <path d="M10 14 21 3"/>, <path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/>],
+    upload: [<path d="M12 16V4"/>, <path d="m7 9 5-5 5 5"/>, <path d="M20 16.5V19a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2.5"/>],
+    check: [<path d="m20 6-11 11-5-5"/>],
+    warn: [<path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3Z"/>, <path d="M12 9v4"/>, <path d="M12 17h.01"/>],
+    clock: [<circle cx="12" cy="12" r="9"/>, <path d="M12 7v5l3 2"/>],
+    eye: [<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>, <circle cx="12" cy="12" r="3"/>],
+    file: [<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/>, <path d="M14 2v6h6"/>, <path d="M8 13h8M8 17h5"/>],
+    arrow: [<path d="M7 17 17 7"/>, <path d="M7 7h10v10"/>],
+  };
+  return <svg {...props}>{p[name] || p.check}</svg>;
+}
+
+function useRoute() {
+  const read = () => (location.hash.replace(/^#/, "") || "/");
+  const [route, setRoute] = useState(read());
+  useEffect(() => {
+    const onHash = () => setRoute(read());
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+  return [route, (to) => {
+    const appRoutes = new Set(["/dashboard", "/grants/new", "/review", "/status"]);
+    const appRoute = appRoutes.has(to) || to.startsWith("/grants/") || to.startsWith("/proof/");
+    if (appRoute && window.parent && window.parent !== window) {
+      window.parent.location.href = to;
+      return;
+    }
+    location.hash = to;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }];
+}
+
+function App() {
+  const [route, go] = useRoute();
+  const [toast, setToast] = useState("");
+  useEffect(() => {
+    const onToast = (event) => {
+      setToast(event.detail || "Action complete");
+      clearTimeout(window.__walproofToast);
+      window.__walproofToast = setTimeout(() => setToast(""), 1800);
+    };
+    window.addEventListener("walproof:toast", onToast);
+    return () => window.removeEventListener("walproof:toast", onToast);
+  }, []);
+  const page = {
+    "/": <Landing go={go} />,
+    "/dashboard": <Dashboard go={go} />,
+    "/grants/new": <CreateGrant />,
+    "/grants/demo": <GrantDetail go={go} />,
+    "/grants/demo/milestones/2/submit": <SubmitProof go={go} />,
+    "/review": <Review />,
+    "/proof/demo-proof": <PublicProof />,
+    "/status": <Status />,
+  }[route] || <Landing go={go} />;
+  const publicRoute = route === "/" || route === "/proof/demo-proof";
+  return <>
+    <div className="bg-walrus" />
+    {publicRoute ? <TopNav go={go} route={route} /> : <AppShell go={go} route={route}>{page}</AppShell>}
+    {publicRoute && page}
+    {toast && <div className="toast fixed bottom-5 left-1/2 z-[80] -translate-x-1/2 rounded-2xl border border-ice/20 bg-navy/90 px-4 py-3 text-sm font-semibold text-white shadow-glow backdrop-blur-xl">{toast}</div>}
+  </>;
+}
+
+function Button({ children, onClick, variant = "primary", disabled = false, title }) {
+  const cls = variant === "primary" ? "btn btn-primary" : variant === "danger" ? "btn btn-danger" : variant === "success" ? "btn btn-success" : "btn btn-secondary";
+  const handleClick = onClick || (() => window.dispatchEvent(new CustomEvent("walproof:toast", { detail: "Connect wallet and configure mainnet env to run this action" })));
+  return <button title={title} disabled={disabled} onClick={handleClick} className={`${cls} ${disabled ? "cursor-not-allowed opacity-55 hover:translate-y-0" : ""}`}>{children}</button>;
+}
+
+function TopNav({ go, route }) {
+  const [activeNav, setActiveNav] = useState(route === "/status" ? "Status" : "Product");
+  useEffect(() => {
+    if (route === "/status") setActiveNav("Status");
+    if (route === "/proof/demo-proof") setActiveNav("View Proof");
+    if (route === "/") setActiveNav("Product");
+  }, [route]);
+  const navItems = ["Product", "Proof Flow", "Integrations", "Status", "View Proof"];
+  const jump = (id) => {
+    const label = id === "product" ? "Product" : id === "proof-flow" ? "Proof Flow" : "Integrations";
+    setActiveNav(label);
+    if (route !== "/") {
+      go("/");
+      setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 80);
+    } else {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+  return <header className="fixed left-0 right-0 top-4 z-50 px-5 lg:px-16">
+    <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-4">
+      <button onClick={() => go("/")} className="logo-shell flex h-12 w-[145px] items-center justify-center rounded-full border px-4 backdrop-blur-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-white sm:w-[180px]">
+        <img src={A("walproof-logo-cropped.png")} alt="WalProof" className="logo-img h-8 w-full object-contain" />
+      </button>
+      <nav className="liquid-glass hidden items-center rounded-full px-1.5 py-1.5 md:flex">
+        {navItems.map((item) => (
+          <button
+            key={item}
+            onClick={() => item === "Status" ? (setActiveNav("Status"), go("/status")) : item === "View Proof" ? (setActiveNav("View Proof"), go("/proof/demo-proof")) : jump(item === "Product" ? "product" : item === "Proof Flow" ? "proof-flow" : "integrations")}
+            className={`relative rounded-full px-3.5 py-2 text-sm font-semibold transition ${activeNav === item ? "bg-white text-black shadow-[0_6px_22px_rgba(255,255,255,.18)]" : "text-white/88 hover:text-white"}`}
+          >
+            {item}
+          </button>
+        ))}
+      </nav>
+      <div className="hidden sm:block">
+        <button onClick={() => go("/dashboard")} className="liquid-glass-strong h-12 rounded-full px-5 text-sm font-semibold text-white">Open App</button>
+      </div>
+    </div>
+  </header>;
+}
+
+function AppShell({ go, route, children }) {
+  return <div className="min-h-screen lg:grid lg:grid-cols-[280px_1fr]">
+    <aside className="hidden border-r border-white/10 bg-navy/78 p-5 backdrop-blur-2xl lg:block">
+      <button onClick={() => go("/")} className="mb-8"><img src={A("walproof-logo-cropped.png")} alt="WalProof" className="logo-img w-[210px]" /></button>
+      <nav className="space-y-1">
+        {routes.slice(1).map(([to, label]) => <button key={to} onClick={() => go(to)} className={`flex h-11 w-full items-center justify-between rounded-xl px-3 text-left text-sm font-semibold transition ${route === to ? "bg-white text-navy" : "text-slateText hover:bg-white/[.06] hover:text-white"}`}>{label}<span className={`h-1.5 w-1.5 rounded-full ${route === to ? "bg-navy" : "bg-white/25"}`} /></button>)}
+      </nav>
+      <div className="glass mt-8 rounded-3xl p-4">
+        <StatusBadge text="Setup warning" tone="warning" />
+        <p className="mt-3 text-sm font-bold">Integration checks unavailable</p>
+        <p className="mt-1 text-xs leading-5 text-slateText">Static demo has no server env. Status page shows setup requirements.</p>
+      </div>
+    </aside>
+    <main className="min-w-0 px-4 py-5 sm:px-6">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[.035] p-3 backdrop-blur-xl">
+        <div className="flex flex-wrap gap-2"><WalletPill /><StatusBadge text="Walrus Ready" tone="walrus" /><StatusBadge text="Sui Mainnet" tone="mainnet" /></div>
+        <Button variant="secondary" onClick={() => go("/proof/demo-proof")}>Public Proof</Button>
+      </div>
+      {children}
+    </main>
+  </div>;
+}
+
+function StatusBadge({ text, tone = "neutral" }) {
+  const c = {
+    success: "border-success/25 bg-success/10 text-success",
+    warning: "border-amber/30 bg-amber/10 text-amber",
+    danger: "border-danger/30 bg-danger/10 text-danger",
+    walrus: "border-ice/30 bg-ice/10 text-ice",
+    tatum: "border-royal/35 bg-royal/15 text-[#9cc5ff]",
+    mainnet: "border-white/25 bg-white/10 text-white",
+    neutral: "border-white/12 bg-white/[.055] text-mist"
+  }[tone];
+  return <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold ${c}`}><span className="h-1.5 w-1.5 rounded-full bg-current" />{text}</span>;
+}
+
+function tone(status) {
+  if (["Approved", "Verified", "Stored on Walrus"].includes(status)) return "success";
+  if (["Under Review", "In Progress"].includes(status)) return "warning";
+  if (status.includes("Revision") || status === "Rejected") return "danger";
+  return "neutral";
+}
+
+function WalletPill() {
+  return <span className="mono-pill inline-flex h-9 items-center rounded-xl border border-white/10 bg-white/[.055] px-3 text-xs text-mist">{demo.wallet}</span>;
+}
+
+function BlobPill({ id }) {
+  const [copied, setCopied] = useState(false);
+  return <button onClick={() => copy(id, setCopied)} className="mono-pill inline-flex max-w-full items-center gap-1.5 rounded-lg border border-ice/22 bg-ice/10 px-2 py-1 text-[11px] text-ice"><span className="truncate">{id}</span><Icon name={copied ? "check" : "copy"} className="h-3.5 w-3.5 shrink-0" /></button>;
+}
+
+function TxPill({ id }) {
+  return <span className="mono-pill inline-flex rounded-lg border border-electric/25 bg-electric/10 px-2 py-1 text-[11px] text-ice">{id}</span>;
+}
+
+function copy(text, setCopied) {
+  navigator.clipboard?.writeText(text);
+  setCopied(true);
+  setTimeout(() => setCopied(false), 1200);
+}
+
+function Landing({ go }) {
+  return <MSection initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+    <section className="relative overflow-hidden">
+      <div className="hero-bg" />
+      <div className="relative mx-auto grid min-h-screen max-w-[1240px] items-center gap-12 px-4 pt-28 pb-14 sm:px-6 lg:grid-cols-[.82fr_1.18fr]">
+        <MDiv initial={{ filter: "blur(10px)", y: 24, opacity: 0 }} animate={{ filter: "blur(0px)", y: 0, opacity: 1 }} transition={{ duration: .78, ease: "easeOut" }} className="text-center lg:text-left">
+          <div className="liquid-glass mx-auto mb-8 inline-flex items-center rounded-full px-4 py-1.5 lg:mx-0">
+            <span className="text-sm font-semibold text-white/92">Walrus Blobs / Tatum RPC / Sui Records</span>
+          </div>
+          <h1 className="font-heading italic text-[62px] leading-[.78] tracking-[-4px] text-white sm:text-[92px] lg:text-[112px]">Proof before payout</h1>
+          <p className="mx-auto mt-6 max-w-xl text-base font-light leading-tight tracking-normal text-white/90 sm:text-lg lg:mx-0">WalProof turns each grant milestone into a proof room with Walrus evidence, Tatum verification, and Sui records</p>
+          <div className="mt-8 flex flex-col items-center gap-5 sm:flex-row lg:items-start"><button onClick={() => go("/grants/new")} className="liquid-glass-strong rounded-full px-6 py-3 text-sm font-semibold text-white">Create Proof Room</button><button onClick={() => go("/proof/demo-proof")} className="inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-white/80">View Public Proof <Icon name="arrow" /></button></div>
+          <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+            <div className="liquid-glass mx-auto flex w-[220px] flex-col rounded-[1.25rem] p-5 text-left lg:mx-0"><Icon name="file" className="h-7 w-7 text-white" /><div className="mt-10"><p className="font-heading italic text-4xl leading-none tracking-[-1px] text-white">4 Blobs</p><p className="mt-2 text-xs font-light text-white">Stored on Walrus</p></div></div>
+            <div className="liquid-glass mx-auto flex w-[220px] flex-col rounded-[1.25rem] p-5 text-left lg:mx-0"><Icon name="check" className="h-7 w-7 text-white" /><div className="mt-10"><p className="font-heading italic text-4xl leading-none tracking-[-1px] text-white">Sui</p><p className="mt-2 text-xs font-light text-white">Verified through Tatum</p></div></div>
+          </div>
+        </MDiv>
+        <HeroVisual go={go} />
+      </div>
+    </section>
+    <main>
+      <IntegrationStrip />
+      <HowItWorks />
+      <ProofRoomPreview go={go} />
+      <ReviewProofSection go={go} />
+      <FinalCTA go={go} />
+    </main>
+  </MSection>;
+}
+
+function HeroVisual({ go }) {
+  return <MDiv initial={{ filter: "blur(10px)", y: 28, opacity: 0, scale: .98 }} animate={{ filter: "blur(0px)", y: 0, opacity: 1, scale: 1 }} transition={{ duration: .75, delay: .12, ease: "easeOut" }} className="premium-frame card-hover relative p-3">
+    <img src={A("hero-walrus-blue.png")} alt="WalProof proof room visual" className="h-[360px] w-full rounded-[1.55rem] object-cover sm:h-[520px]" />
+    <div className="absolute left-6 top-6 rounded-full liquid-glass px-3.5 py-2"><span className="text-xs font-semibold text-white">RPC: Tatum</span></div>
+    <div className="absolute right-6 top-6 hidden rounded-full liquid-glass px-3.5 py-2 sm:block"><span className="text-xs font-semibold text-white">Walrus Blob</span></div>
+    <div className="absolute right-8 top-24 hidden rounded-full liquid-glass px-3.5 py-2 sm:block"><span className="mono-pill text-xs text-white">0x82f4...aa19</span></div>
+    <div className="absolute bottom-6 left-6 right-6 rounded-[1.5rem] liquid-glass p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div><p className="mono-pill text-xs uppercase tracking-[.18em] text-ice">Proof Room</p><h3 className="mt-1 font-heading text-2xl font-bold tracking-[-.04em]">{demo.grant}</h3></div>
+        <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-black">Under Review</span>
+      </div>
+      <div className="mt-4 grid grid-cols-3 gap-3">
+        <Mini label="Evidence" value="4 files" />
+        <Mini label="Walrus" value="4 blobs" />
+        <Mini label="Sui" value="Verified" />
+      </div>
+    </div>
+  </MDiv>;
+}
+
+function IntegrationStrip() {
+  return <section id="integrations" className="mx-auto max-w-[1240px] px-4 py-16 sm:px-6 lg:py-24">
+    <div className="grid gap-4 md:grid-cols-3">
+      <IntegrationCard logo="walrus-w-transparent.png" title="Walrus Evidence Storage" copy="Milestone files and proof packets are stored as Walrus blobs." />
+      <IntegrationCard logo="tatum-transparent.png" wide title="Tatum RPC" copy="Tatum powers Sui mainnet reads, transaction lookup, and proof verification." />
+      <IntegrationCard logo="sui-logo.svg" wide title="Sui Records" copy="Proof submissions and sponsor verdicts are registered on Sui." />
+    </div>
+  </section>;
+}
+
+function IntegrationCard({ logo, title, copy: body, wide }) {
+  return <MDiv initial={{ y: 16, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} className="glass card-hover rounded-3xl p-6">
+    <div className="mb-10 flex h-16 items-center"><img src={A(logo)} alt={title} className={`logo-img ${wide ? "max-h-14 w-40 object-left" : "h-14 w-14"}`} /></div>
+    <h3 className="font-heading text-2xl font-bold tracking-[-.04em]">{title}</h3>
+    <p className="mt-3 text-sm leading-6 text-slateText">{body}</p>
+  </MDiv>;
+}
+
+function HowItWorks() {
+  const steps = [["Create Proof Room", "Define milestones and required proof."], ["Submit Evidence", "Upload files into the Evidence Vault."], ["Store on Walrus", "Attach each file as a Walrus Blob."], ["Register on Sui", "Record proof and Sponsor Verdicts."]];
+  return <section id="proof-flow" className="mx-auto max-w-[1240px] px-4 py-16 sm:px-6 lg:py-28">
+    <SectionTitle eyebrow="Proof Flow" title="From milestone claim to funding decision." />
+    <div className="mt-10 grid gap-4 md:grid-cols-4">{steps.map(([title, body], i) => <div key={title} className="card-hover rounded-3xl border border-white/10 bg-white/[.04] p-5"><span className="mono-pill inline-flex h-8 items-center rounded-full border border-white/12 bg-white/[.06] px-3 text-xs font-semibold text-white/80">Step {i+1}</span><h3 className="mt-8 font-heading text-xl font-bold tracking-[-.04em]">{title}</h3><p className="mt-3 text-sm text-slateText">{body}</p></div>)}</div>
+  </section>;
+}
+
+function ProofRoomPreview({ go }) {
+  return <section id="product" className="mx-auto max-w-[1240px] px-4 py-16 sm:px-6 lg:py-28">
+    <div className="grid items-center gap-8 lg:grid-cols-[.88fr_1.12fr]">
+      <SectionTitle eyebrow="Proof Room Preview" title="Evidence feels formal, not scattered." copy="Each milestone becomes a structured Proof Room with exhibits, blob IDs, and verification status." />
+      <div className="glass-strong rounded-3xl p-5">
+        <EvidenceVault compact />
+        <div className="mt-5 flex justify-end"><Button onClick={() => go("/grants/demo")}>Open Demo Grant</Button></div>
+      </div>
+    </div>
+  </section>;
+}
+
+function ReviewProofSection({ go }) {
+  return <section className="mx-auto max-w-[1240px] px-4 py-16 sm:px-6 lg:py-28">
+    <div className="grid gap-6 lg:grid-cols-2">
+      <div className="glass rounded-3xl p-6"><SectionTitle eyebrow="Sponsor Review" title="Approve only when proof matches the promise." copy="Review Walrus evidence, Tatum RPC status, Sui Records, and the Sponsor Verdict in one focused view." /><div className="mt-8 flex flex-col gap-3 sm:flex-row"><Button variant="success" onClick={() => go("/review")}>Review Milestone</Button><Button variant="secondary" onClick={() => go("/proof/demo-proof")}>Open Public Proof</Button></div></div>
+      <PublicProofMini />
+    </div>
+  </section>;
+}
+
+function FinalCTA({ go }) {
+  return <section className="mx-auto max-w-[1240px] px-4 pb-24 sm:px-6 lg:pb-32">
+    <div className="white-card rounded-[2rem] p-8 text-center sm:p-12">
+      <img src={A("walproof-logo-cropped.png")} alt="WalProof" className="logo-img mx-auto mb-7 w-[290px]" />
+      <h2 className="font-heading text-4xl font-bold leading-tight tracking-[-.055em] text-white sm:text-6xl">Funding should follow proof.</h2>
+      <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row"><Button onClick={() => go("/dashboard")}>Open App</Button><Button variant="secondary" onClick={() => go("/status")}>Check Status</Button></div>
+    </div>
+  </section>;
+}
+
+function SectionTitle({ eyebrow, title, copy }) {
+  return <div><p className="mono-pill text-xs uppercase tracking-[.24em] text-ice">{eyebrow}</p><h2 className="mt-3 max-w-3xl font-heading text-4xl font-bold leading-[.95] tracking-[-.055em] sm:text-6xl">{title}</h2>{copy && <p className="mt-4 max-w-2xl text-base leading-7 text-slateText">{copy}</p>}</div>;
+}
+
+function Dashboard({ go }) {
+  return <Page title="Grant Rooms" subtitle="Track Proof Rooms, Evidence Vaults, and Sponsor Verdicts." action={<Button onClick={() => go("/grants/new")}>Create Proof Room</Button>}>
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <MetricCard label="Active Grants" value="12" insight="4 awaiting milestone proof" />
+      <MetricCard label="Pending Reviews" value="8" insight="Oldest review pending 4 days" />
+      <MetricCard label="Evidence Stored" value="126" insight="Walrus-backed files" />
+      <MetricCard label="Sui Records" value="39" insight="Tatum RPC registrations" />
+    </div>
+    <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_360px]">
+      <div className="grid gap-4">{grants.map((g, i) => <GrantCard key={g[0]} grant={g} go={go} index={i} />)}</div>
+      <div className="grid h-fit gap-4"><ReviewQueue /><TimelineCard /></div>
+    </div>
+  </Page>;
+}
+
+function Page({ title, subtitle, action, children }) {
+  return <section><div className="mb-7 flex flex-col justify-between gap-4 lg:flex-row lg:items-end"><div><p className="mono-pill text-xs uppercase tracking-[.24em] text-ice">WalProof</p><h1 className="mt-3 font-heading text-4xl font-bold tracking-[-.055em] sm:text-6xl">{title}</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-slateText">{subtitle}</p></div>{action}</div>{children}</section>;
+}
+
+function MetricCard({ label, value, insight }) {
+  return <div className="glass card-hover rounded-3xl p-5"><p className="text-sm font-semibold text-slateText">{label}</p><p className="mt-5 font-metric text-4xl font-bold tracking-[-.055em]">{value}</p><div className="mt-4 h-1.5 rounded-full bg-white/10"><div className="h-full w-2/3 rounded-full bg-gradient-to-r from-ice to-electric" /></div><p className="mt-3 text-xs text-slateText">{insight}</p></div>;
+}
+
+function GrantCard({ grant, go, index }) {
+  const [name, sponsor, builder, funding, status, progress, evidence] = grant;
+  return <MDiv initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .04 }} className="glass card-hover rounded-3xl p-5">
+    <div className="grid gap-5 lg:grid-cols-[1fr_210px]">
+      <div><div className="mb-3 flex flex-wrap gap-2"><StatusBadge text={status} tone={tone(status)} /><StatusBadge text="Walrus Ready" tone="walrus" /><StatusBadge text="Tatum RPC" tone="tatum" /><StatusBadge text="Sui Record" tone="mainnet" /></div><h3 className="font-heading text-2xl font-bold tracking-[-.04em]">{name}</h3><p className="mt-1 text-sm text-slateText">{sponsor} · {builder}</p><div className="mt-5 grid gap-3 sm:grid-cols-4"><Mini label="Funding" value={funding} /><Mini label="Progress" value={`${progress}%`} /><Mini label="Evidence" value={evidence} /><Mini label="Milestones" value="3" /></div></div>
+      <div className="flex flex-col justify-between gap-4"><Progress value={progress} label="Milestone progress" /><Button onClick={() => go("/grants/demo")}>Open Grant</Button></div>
+    </div>
+  </MDiv>;
+}
+
+function Mini({ label, value }) {
+  return <div className="rounded-2xl border border-white/10 bg-white/[.045] p-3"><p className="text-[11px] font-semibold text-slateText">{label}</p><p className="mt-1 font-heading text-lg font-bold tracking-[-.04em]">{value}</p></div>;
+}
+
+function Progress({ value, label }) {
+  return <div><div className="mb-2 flex justify-between text-xs"><span className="text-slateText">{label}</span><span className="mono-pill text-ice">{value}%</span></div><div className="h-2 rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-ice via-electric to-royal" style={{ width: `${value}%` }} /></div></div>;
+}
+
+function CreateGrant() {
+  const [created, setCreated] = useState(false);
+  return <Page title="Create Proof Room" subtitle="Define the sponsor, builder, milestones, and evidence rules." action={<Button onClick={() => setCreated(true)}>{created ? "Proof Room Ready" : "Create Proof Room"}</Button>}>
+    {created && <div className="mb-5 rounded-2xl border border-success/25 bg-success/10 p-4 text-sm font-semibold text-success">Grant room ready. Add milestone proof when the builder ships.</div>}
+    <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
+      <div className="grid gap-6"><Form title="Grant Identity" fields={["Grant name", "Sponsor name", "Builder/team name", "Funding label", "Project website", "GitHub repo"]} /><MilestonePlan /></div>
+      <div className="grid h-fit gap-4"><Form title="Network" fields={["Sui network", "Sponsor wallet", "Builder wallet"]} /><StatusSetup /></div>
+    </div>
+  </Page>;
+}
+
+function Form({ title, fields }) {
+  return <div className="glass rounded-3xl p-6"><h2 className="font-heading text-2xl font-bold tracking-[-.04em]">{title}</h2><div className="mt-5 grid gap-4 md:grid-cols-2">{fields.map(f => <label key={f}><span className="mb-1.5 block text-xs font-semibold text-slateText">{f}</span><input className="h-12 w-full rounded-2xl border border-white/10 bg-navy/70 px-3 text-sm text-white focus:border-ice focus:outline-none" placeholder={f} /></label>)}</div></div>;
+}
+
+function MilestonePlan() {
+  return <div className="glass rounded-3xl p-6"><h2 className="font-heading text-2xl font-bold tracking-[-.04em]">Milestone Plan</h2><div className="mt-5 grid gap-3">{milestones.map((m, i) => <MilestoneCard key={m[0]} item={m} index={i} />)}</div></div>;
+}
+
+function MilestoneCard({ item, index }) {
+  return <div className="card-hover rounded-2xl border border-white/10 bg-white/[.04] p-4"><div className="flex flex-wrap justify-between gap-3"><div><p className="mono-pill text-[11px] uppercase tracking-[.2em] text-ice/70">Milestone {index + 1}</p><h3 className="mt-1 font-heading text-xl font-bold tracking-[-.04em]">{item[0]}</h3><p className="mt-1 text-sm text-slateText">{item[1]}</p></div><StatusBadge text={item[2]} tone={tone(item[2])} /></div></div>;
+}
+
+function GrantDetail({ go }) {
+  return <Page title={demo.grant} subtitle="Milestone proof, Evidence Vault, Sponsor Verdict, and Sui verification." action={<Button onClick={() => go("/review")}>Review Milestone</Button>}>
+    <div className="mb-6 grid gap-3 md:grid-cols-5"><Mini label="Sponsor" value="Tatum x Walrus" /><Mini label="Builder" value="Northstar" /><Mini label="Funding" value="$2,000" /><Mini label="Progress" value="67%" /><Mini label="Status" value="Review" /></div>
+    <div className="grid gap-6 xl:grid-cols-[300px_1fr_340px]">
+      <aside className="grid h-fit gap-3">{milestones.map((m, i) => <MilestoneCard key={m[0]} item={m} index={i} />)}</aside>
+      <main className="grid gap-6"><Panel title="Milestone 2"><p className="text-sm leading-6 text-slateText">Walrus Storage Integration is submitted for sponsor review.</p><Checklist /></Panel><EvidenceVault /><ProofPacket /><TimelineCard /></main>
+      <aside className="grid h-fit gap-4 xl:sticky xl:top-5"><VerificationCard /><FundingCard go={go} /></aside>
+    </div>
+  </Page>;
+}
+
+function SubmitProof({ go }) {
+  return <Page title="Submit Milestone Proof" subtitle="Upload evidence, create a Proof Packet, and register the Sui Record." action={<Button onClick={() => go("/proof/demo-proof")}>View Public Proof</Button>}>
+    <div className="glass-strong mb-6 rounded-3xl p-6"><StatusBadge text="In Progress" tone="warning" /><h2 className="mt-3 font-heading text-3xl font-bold tracking-[-.05em]">{demo.milestone}</h2><p className="mt-2 text-sm text-slateText">Required: demo video, blob proof, architecture diagram, transaction proof.</p></div>
+    <div className="grid gap-6 xl:grid-cols-[.85fr_1.15fr]"><Form title="Builder Update" fields={["Completed work", "Technical notes", "Blockers", "Next step"]} /><div className="grid gap-6"><UploadZone /><ProofPacket /><RegisterCard /></div></div>
+  </Page>;
+}
+
+function UploadZone() {
+  return <Panel title="Evidence Upload"><div className="scan rounded-3xl border border-dashed border-ice/30 bg-ice/[.055] p-8 text-center"><Icon name="upload" className="mx-auto h-10 w-10 text-ice" /><h3 className="mt-4 font-heading text-2xl font-bold tracking-[-.04em]">Drop milestone evidence here</h3><p className="mt-2 text-sm text-slateText">Files become Walrus Blob evidence.</p><div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row"><Button>Upload Evidence</Button><Button variant="secondary">Add from URL</Button><Button variant="secondary">Add JSON Proof</Button></div></div><div className="mt-5"><EvidenceVault compact /></div></Panel>;
+}
+
+function Review() {
+  return <Page title="Sponsor Review Board" subtitle="Approve, reject, or request revision after checking proof." action={<Button variant="secondary">No milestones waiting? Demo selected.</Button>}>
+    <div className="grid gap-6 xl:grid-cols-[300px_1fr_360px]"><ReviewQueue /><main className="grid gap-6"><Panel title="Selected Proof"><p className="text-sm text-slateText">Check the Evidence Vault, Proof Packet, and Verification Trail.</p><Checklist /></Panel><EvidenceVault /><ProofPacket /><TimelineCard /></main><DecisionPanel /></div>
+  </Page>;
+}
+
+function PublicProof() {
+  return <section className="relative min-h-screen px-4 py-10 sm:px-6">
+    <div className="mx-auto max-w-[1180px]">
+      <div className="white-card rounded-[2rem] p-6 sm:p-9"><div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-start"><div><img src={A("walproof-logo-cropped.png")} alt="WalProof" className="logo-img mb-8 w-[270px] sm:w-[360px]" /><p className="mono-pill text-xs uppercase tracking-[.24em] text-ice">Public Proof Page</p><h1 className="mt-3 font-heading text-4xl font-bold tracking-[-.055em] sm:text-6xl">{demo.milestone}</h1><p className="mt-3 text-white/72">Milestone proof for {demo.grant}</p></div><CopyProof /></div><div className="mt-6 grid gap-3 md:grid-cols-3"><VerifyTile title="Stored on Walrus" /><VerifyTile title="Registered on Sui" /><VerifyTile title="Verified through Tatum" /></div></div>
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_350px]"><main className="grid gap-6"><EvidenceVault /><ProofPacket /><VerificationCard /><TimelineCard /></main><aside className="grid h-fit gap-4"><SponsorVerdict /><StatusSetup /></aside></div>
+    </div>
+  </section>;
+}
+
+function CopyProof() {
+  const [copied, setCopied] = useState(false);
+  return <Button onClick={() => copy(location.href, setCopied)}>{copied ? "Copied" : "Copy Proof Link"}</Button>;
+}
+
+function VerifyTile({ title }) {
+  return <div className="rounded-2xl border border-[#c8ddff] bg-white p-4"><p className="text-sm font-bold text-navy">{title}</p><p className="mono-pill mt-2 text-xs text-[#49627d]">{title.includes("Walrus") ? demo.packet : title.includes("Sui") ? demo.tx : "Tatum RPC setup required"}</p></div>;
+}
+
+function Status() {
+  return <Page title="Infrastructure Status" subtitle="Real integration checks require backend env variables. This static demo shows setup state." action={<Button variant="secondary" disabled title="No backend env available in static prototype">Run checks unavailable</Button>}>
+    <div className="grid gap-6 lg:grid-cols-2"><StatusPanel title="Tatum RPC" rows={[["Status", "Setup required"], ["Endpoint", "Sui Mainnet"], ["API key", "Missing in static demo"], ["Latest RPC call", "Not checked"]]} warning /><StatusPanel title="Walrus Storage" rows={[["Publisher", "Not checked"], ["Aggregator", "Not checked"], ["Latest blob", demo.packet], ["Upload test", "Requires backend"]]} warning /><StatusPanel title="Sui Network" rows={[["Network", "Mainnet target"], ["Package ID", demo.package], ["Latest transaction", demo.tx], ["Object verification", "Not checked"]]} /><StatusPanel title="Wallet" rows={[["Connected wallet", demo.wallet], ["Role", "Sponsor"], ["Network match", "Not checked"], ["Balance", "Requires wallet adapter"]]} /></div>
+  </Page>;
+}
+
+function StatusPanel({ title, rows, warning }) {
+  return <div className="glass card-hover rounded-3xl p-6"><div className="mb-5 flex items-center justify-between"><h2 className="font-heading text-2xl font-bold tracking-[-.04em]">{title}</h2><StatusBadge text={warning ? "Setup warning" : "Demo data"} tone={warning ? "warning" : "neutral"} /></div><div className="grid gap-3">{rows.map(([k, v]) => <div key={k} className="flex items-center justify-between gap-5 rounded-2xl border border-white/10 bg-white/[.04] p-3"><span className="text-sm text-slateText">{k}</span><span className="mono-pill break-all text-right text-xs text-mist">{v}</span></div>)}</div></div>;
+}
+
+function EvidenceVault({ compact }) {
+  return <Panel title="Evidence Vault"><div className="grid gap-3">{exhibits.map((e, i) => <EvidenceCard key={e[0]} exhibit={e} compact={compact} index={i} />)}</div></Panel>;
+}
+
+function EvidenceCard({ exhibit, compact, index }) {
+  const [letter, title, type, size, blob, status] = exhibit;
+  return <MDiv initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .04 }} className="card-hover rounded-2xl border border-white/10 bg-white/[.045] p-4">
+    <div className="grid gap-4 sm:grid-cols-[54px_1fr]"><div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-ice/20 bg-ice/10 text-ice"><Icon name="file" /></div><div><div className="flex flex-wrap justify-between gap-3"><div><p className="mono-pill text-[11px] uppercase tracking-[.2em] text-ice/70">Exhibit {letter}</p><h3 className="font-heading text-lg font-bold tracking-[-.035em]">{title}</h3></div><StatusBadge text={status} tone={tone(status)} /></div><div className="mt-3 flex flex-wrap gap-2"><StatusBadge text={`${type} · ${size}`} /><BlobPill id={blob} /></div>{!compact && <div className="mt-3 flex flex-wrap gap-2"><Button variant="secondary"><Icon name="eye" />View</Button><Button variant="secondary"><Icon name="copy" />Copy</Button><Button variant="secondary"><Icon name="check" />Verify</Button></div>}</div></div>
+  </MDiv>;
+}
+
+function Panel({ title, children }) {
+  return <div className="glass rounded-3xl p-5 sm:p-6"><h2 className="mb-4 font-heading text-2xl font-bold tracking-[-.04em]">{title}</h2>{children}</div>;
+}
+
+function ProofPacket() {
+  return <Panel title="Proof Packet"><p className="text-sm text-slateText">Evidence metadata bundled and stored on Walrus.</p><div className="mt-5 grid gap-3 sm:grid-cols-2"><Mini label="Evidence count" value="4" /><Mini label="Packet status" value="Stored" /><Mini label="Packet hash" value="8f31c0" /><Mini label="Created" value="May 29" /></div><div className="mt-4 flex flex-wrap gap-2"><BlobPill id={demo.packet} /><TxPill id={demo.hash} /></div></Panel>;
+}
+
+function VerificationCard() {
+  return <Panel title="Sui Verification"><div className="grid gap-3">{[["Transaction", demo.tx], ["Object ID", demo.object], ["Package ID", demo.package], ["Tatum RPC", "Setup required"]].map(([k, v]) => <div key={k} className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[.04] p-3"><span className="text-sm text-slateText">{k}</span><span className="mono-pill text-right text-xs text-mist">{v}</span></div>)}</div></Panel>;
+}
+
+function FundingCard({ go }) {
+  return <Panel title="Funding Decision"><Mini label="Milestone amount" value={demo.milestoneFunding} /><div className="mt-4"><StatusBadge text="Under Review" tone="warning" /></div><p className="mt-3 text-sm text-slateText">Sponsor action needed.</p><div className="mt-5"><Button onClick={() => go("/review")}>Review Milestone</Button></div></Panel>;
+}
+
+function DecisionPanel() {
+  return <aside className="glass-strong rounded-3xl p-6 xl:sticky xl:top-5"><h2 className="font-heading text-2xl font-bold tracking-[-.04em]">Sponsor Verdict</h2><textarea rows="5" placeholder="Add sponsor review notes." className="mt-5 w-full rounded-2xl border border-white/10 bg-navy/70 px-3 py-3 text-sm text-white focus:border-ice focus:outline-none" /><div className="mt-4 grid gap-3"><Button variant="success">Approve Milestone</Button><Button variant="secondary">Request Revision</Button><Button variant="danger">Reject Milestone</Button></div><div className="mt-5 rounded-2xl border border-ice/20 bg-ice/10 p-4"><p className="font-bold">Decision confirmation</p><p className="mt-1 text-sm text-slateText">Records a review on Sui through Tatum RPC when connected.</p></div></aside>;
+}
+
+function Checklist() {
+  return <div className="mt-5 grid gap-2">{["Evidence complete", "Demo works", "Blob IDs accessible", "Sui record present", "Scope matches milestone"].map((x, i) => <label key={x} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.04] p-3 text-sm text-mist"><input type="checkbox" defaultChecked={i < 3} className="accent-[#2F80FF]" />{x}</label>)}</div>;
+}
+
+function ReviewQueue() {
+  return <Panel title="Review Queue">{grants.map((g, i) => <div key={g[0]} className={`mb-3 rounded-2xl border p-4 last:mb-0 ${i === 0 ? "border-ice/25 bg-ice/10" : "border-white/10 bg-white/[.04]"}`}><p className="font-bold">{g[0]}</p><p className="mt-1 text-xs text-slateText">{demo.milestone} · {g[2]}</p><div className="mt-3 flex flex-wrap gap-2"><StatusBadge text={g[4]} tone={tone(g[4])} /><StatusBadge text={`${g[6]} files`} /></div></div>)}</Panel>;
+}
+
+function TimelineCard() {
+  return <Panel title="Proof Timeline"><div className="grid gap-4">{timeline.map((x, i) => <MDiv key={x} initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * .04 }} className="flex gap-3"><span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${i < 4 ? "bg-ice" : i < 6 ? "bg-electric" : "bg-amber"}`} /><div><p className="text-sm font-bold">{x}</p><p className="mono-pill text-[11px] text-slateText">2026-05-{String(22+i).padStart(2,"0")}</p></div></MDiv>)}</div></Panel>;
+}
+
+function RegisterCard() {
+  return <Panel title="Register Proof Record"><div className="grid gap-3 sm:grid-cols-2"><Mini label="Wallet" value={demo.wallet} /><Mini label="Network" value="Mainnet" /><Mini label="Packet" value="Ready" /><Mini label="Gas" value="0.004 SUI" /></div><div className="mt-5"><Button disabled title="Connect backend and wallet to register">Submit to Sui</Button></div></Panel>;
+}
+
+function StatusSetup() {
+  return <Panel title="Setup Status"><div className="grid gap-3"><StatusRow label="Tatum RPC" value="API key missing" warn /><StatusRow label="Walrus Storage" value="Backend check required" warn /><StatusRow label="Sui Network" value="Mainnet target" /><StatusRow label="Wallet" value={demo.wallet} /></div></Panel>;
+}
+
+function StatusRow({ label, value, warn }) {
+  return <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[.04] p-3"><span className="text-sm text-slateText">{label}</span><span className={`mono-pill text-right text-xs ${warn ? "text-amber" : "text-mist"}`}>{value}</span></div>;
+}
+
+function PublicProofMini() {
+  return <div className="premium-frame relative p-3">
+    <img src={A("hero-walrus-blue.png")} alt="Public proof page preview" className="h-[360px] w-full rounded-[1.55rem] object-cover object-center" />
+    <div className="absolute inset-3 rounded-[1.55rem] bg-gradient-to-br from-navy/20 via-navy/5 to-royal/22" />
+    <div className="absolute bottom-6 left-6 right-6 rounded-3xl border border-ice/18 bg-[#07111F]/82 p-4 shadow-card backdrop-blur-2xl">
+      <h3 className="font-heading text-2xl font-bold tracking-[-.04em]">Public Proof Page</h3>
+      <div className="mt-3 flex flex-wrap gap-2"><StatusBadge text="Stored on Walrus" tone="walrus" /><StatusBadge text="Registered on Sui" tone="mainnet" /><StatusBadge text="Verified through Tatum" tone="tatum" /></div>
+    </div>
+  </div>;
+}
+
+function SponsorVerdict() {
+  return <Panel title="Sponsor Verdict"><StatusBadge text="Under Review" tone="warning" /><div className="mt-5 grid gap-3"><Mini label="Reviewer" value="0x4ac9" /><Mini label="Verdict" value="Pending" /><Mini label="Review packet" value="Queued" /></div></Panel>;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

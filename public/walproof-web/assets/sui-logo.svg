@@ -1,0 +1,16 @@
+<svg width="240" height="120" viewBox="0 0 240 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sui">
+  <rect width="240" height="120" rx="26" fill="url(#bg)"/>
+  <path d="M78 22C68.3 36.2 52 54.2 52 74.4C52 94.3 67 106 82.5 106C98 106 113 94.3 113 74.4C113 54.2 96.7 36.2 87 22C84.8 18.8 80.2 18.8 78 22Z" fill="url(#drop)"/>
+  <path d="M72 80.7C76.5 87.4 88.6 88.1 94 79.3" stroke="white" stroke-width="7" stroke-linecap="round"/>
+  <path d="M138 44H187C197.5 44 204 49.7 204 58.6C204 67.3 198.1 72.5 187.7 72.5H158.2C152.6 72.5 150 74.6 150 78.4C150 82.4 152.9 84.5 158.2 84.5H204V98H157.4C143.9 98 135.5 90.7 135.5 79.1C135.5 67.8 143.8 60.3 157.4 60.3H187.4C191.4 60.3 193.6 58.7 193.6 55.9C193.6 53.2 191.4 51.8 187.4 51.8H138V44Z" fill="#F4F8FF"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="240" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B1B33"/>
+      <stop offset="1" stop-color="#155EEF"/>
+    </linearGradient>
+    <linearGradient id="drop" x1="54" y1="20" x2="113" y2="106" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#BFE3FF"/>
+      <stop offset="1" stop-color="#2F80FF"/>
+    </linearGradient>
+  </defs>
+</svg>

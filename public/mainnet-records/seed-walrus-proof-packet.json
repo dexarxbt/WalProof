@@ -1,0 +1,64 @@
+{
+  "packet": {
+    "app": "WalProof",
+    "version": "1.0.0",
+    "network": "mainnet",
+    "kind": "seed-proof-packet",
+    "packageId": "0xcb2de9abb7cac5c70ff2e24854ff2595ce4087148329e32dacb0b9bceebe9a3e",
+    "grant": {
+      "id": "mainnet-grant-walrus-storage",
+      "name": "Walrus Storage Integration",
+      "sponsorName": "WalProof Mainnet Sponsor",
+      "builderName": "WalProof Core Builder",
+      "fundingLabel": "Mainnet seed record 1"
+    },
+    "milestone": {
+      "id": "mainnet-grant-walrus-storage-milestone",
+      "title": "Walrus Storage Integration",
+      "fundingLabel": "Mainnet seed record 1",
+      "requiredEvidenceTypes": [
+        "json_proof_packet",
+        "walrus_blob_proof"
+      ]
+    },
+    "builderWallet": "0xa521a37bd92329ca310aeb31f12ab8b039a9ac9b3535b63780f9e9ae142d6306",
+    "sponsorWallet": "0xa521a37bd92329ca310aeb31f12ab8b039a9ac9b3535b63780f9e9ae142d6306",
+    "summary": "Real Walrus mainnet seed Proof Packet for the WalProof public demo dataset.",
+    "evidence": [],
+    "suiRecords": [
+      {
+        "type": "package_publish",
+        "digest": "CvhpmVxAZFebebEberaqCYBnYdWZmvguBMmhz6S8CGua",
+        "packageId": "0xcb2de9abb7cac5c70ff2e24854ff2595ce4087148329e32dacb0b9bceebe9a3e"
+      },
+      {
+        "type": "grant_created",
+        "digest": "6jKMRx2kmt8JK7AvUQKokPDahE3eiDuLwswTjEGWsroW",
+        "objectId": "0x08c55dad12469e28c3495371e583f979bf29395eeeecf0c3cc03259f5170710b"
+      }
+    ],
+    "createdAt": "2026-05-29T11:13:13.749Z"
+  },
+  "walrus": {
+    "blobId": "m_wOf8Q5RgMCFb_Uo3Zoxk-ie63miM99_xP9f54SjP0",
+    "blobObject": {
+      "id": "0x6bbc1882d79885fc0353e0c874bb61ffbf9f65ea0ca2ad6d6635e1867420905c",
+      "registered_epoch": 31,
+      "blob_id": "114682637785219957045267916962004505739912747576916139879245408983945829088411",
+      "size": "1420",
+      "encoding_type": 1,
+      "certified_epoch": 31,
+      "storage": {
+        "id": "0x1c7d2b003d5f2f73fea9ea0da94f66f8bdbfce98c67717bc053feb3653f15848",
+        "start_epoch": 31,
+        "end_epoch": 32,
+        "storage_size": "66034000"
+      },
+      "deletable": false
+    },
+    "contentHash": "94388789e65e4780f2a3ef304a1915ea3044061153172a1532d29001dcd812f9",
+    "size": 1420,
+    "mimeType": "application/json",
+    "uploadedAt": "2026-05-29T11:13:13.749Z"
+  }
+}
