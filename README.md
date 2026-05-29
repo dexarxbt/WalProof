@@ -13,21 +13,9 @@
 </p>
 
 <p align="center">
-  <img src="./public/walproof-web/assets/walrus-w-transparent.png" alt="Walrus mark" width="72" />
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="./public/walproof-web/assets/tatum-transparent.png" alt="Tatum logo" width="132" />
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="./public/walproof-web/assets/sui-logo.svg" alt="Sui logo" width="72" />
-</p>
-
-<p align="center">
-  <a href="#live-mainnet-verification">Live Mainnet Verification</a>
+  <a href="#live-mainnet-verification">Mainnet Verification</a>
   |
-  <a href="#screenshots-a-i">Screenshots A-I</a>
-  |
-  <a href="#demo-script">Demo Script</a>
-  |
-  <a href="#local-and-vercel-setup">Setup</a>
+  <a href="#product-walkthrough">Product Walkthrough</a>
   |
   <a href="#contract">Move Contract</a>
 </p>
@@ -38,7 +26,7 @@
 
 WalProof is a proof registry for teams that fund builders in milestones.
 
-When a builder says, "Milestone complete, please approve payout," the sponsor needs more than a chat message or a screenshot. The sponsor needs evidence, storage proofs, a chain record, a review decision, and a public page that anyone can inspect later.
+When a builder says, "Milestone complete, please approve payout," the sponsor needs more than a chat message or a loose image in a thread. The sponsor needs evidence, storage proofs, a chain record, a review decision, and a public page that anyone can inspect later.
 
 WalProof creates that trail:
 
@@ -77,7 +65,7 @@ WalProof follows strict proof rules because weak proof registries are worse than
 
 ## Live Mainnet Verification
 
-This repository includes real public mainnet artifacts so reviewers can verify the project without trusting screenshots.
+This repository includes real public mainnet artifacts so reviewers can verify the project without trusting presentation images.
 
 ### Sui Mainnet Package
 
@@ -162,36 +150,13 @@ Mainnet artifact files are stored in:
 public/mainnet-records/
 ```
 
----
+## Product Walkthrough
 
-## Judge Verification Checklist
+This walkthrough follows the product from first promise to public verification. Each surface exists to prove a specific part of the WalProof system: what it does, where proof is stored, how verification happens, and how a sponsor reaches a funding decision.
 
-This is the shortest path for a judge to verify that WalProof is not just a design mockup.
+### Proof Before Payout
 
-1. Open the deployed app.
-2. Open `/status`.
-3. Confirm Tatum RPC shows:
-   - network: `mainnet`
-   - latest checkpoint
-   - chain identifier
-   - live latency
-4. Open `/proof/demo-proof`.
-5. Click the Walrus blob pill. It should retrieve the proof packet JSON.
-6. Click the Sui transaction pill. It should open Suiscan on mainnet.
-7. Click the Sui proof object pill. It should open the `MilestoneProof` object.
-8. Open `app/api/tatum-rpc/route.ts` and confirm the Tatum API key is attached server-side only.
-9. Open `move/walproof_registry/sources/registry.move` and confirm the contract stores proof references, emits events, and validates review decisions.
-10. Run the Move tests.
-
----
-
-## Screenshots A-I
-
-Each screenshot is named as a product surface, not as a generic screen capture. The sequence is designed to tell the proof story from landing page to mainnet verification.
-
-### A. Landing Hero - Proof Before Payout
-
-![A - Landing Hero](./docs/images/a-landing-hero-proof-before-payout.png)
+![Proof Before Payout](./docs/images/a-landing-hero-proof-before-payout.png)
 
 This is the first product promise. The landing page makes the proof stack visible immediately: Walrus blobs, Tatum RPC, and Sui records. The hero is not just visual polish. It tells the sponsor what WalProof does before they ever enter the app:
 
@@ -200,9 +165,9 @@ This is the first product promise. The landing page makes the proof stack visibl
 - verification is powered by Tatum RPC
 - public proof is the product outcome
 
-### B. Proof Flow And Integrations
+### Proof Flow And Integrations
 
-![B - Proof Flow Integrations](./docs/images/b-landing-proof-flow-integrations.png)
+![Proof Flow And Integrations](./docs/images/b-landing-proof-flow-integrations.png)
 
 This section explains the core workflow in four actions:
 
@@ -217,22 +182,22 @@ The integration cards above the flow deliberately separate the infrastructure re
 - **Tatum RPC** verifies Sui mainnet reads, transaction lookup, and object verification.
 - **Sui Records** register proof submissions and sponsor verdicts.
 
-### C. Evidence Vault Preview
+### Evidence Vault Preview
 
-![C - Evidence Vault Preview](./docs/images/c-landing-evidence-vault-preview.png)
+![Evidence Vault Preview](./docs/images/c-landing-evidence-vault-preview.png)
 
 The Evidence Vault is the anti-chaos layer. Instead of letting grant proof scatter across social messages, cloud drives, and private chats, WalProof groups files as exhibits:
 
 - Exhibit A: upload demo
 - Exhibit B: architecture diagram
-- Exhibit C: transaction screenshot
+- Exhibit C: Sui transaction proof
 - Exhibit D: proof packet
 
 Every exhibit is tied to a blob ID, file type, size, and status.
 
-### D. Sponsor Review And Final CTA
+### Sponsor Review And Final CTA
 
-![D - Sponsor Review CTA](./docs/images/d-landing-sponsor-review-cta.png)
+![Sponsor Review CTA](./docs/images/d-landing-sponsor-review-cta.png)
 
 This surface clarifies the reviewer job:
 
@@ -240,11 +205,11 @@ This surface clarifies the reviewer job:
 
 The reviewer sees Walrus evidence, Tatum verification, Sui records, and public proof state before making a funding decision. The CTA avoids payout language because WalProof is not an escrow. It is a verification layer before payout.
 
-### E. Public Proof Page With Mainnet Verification
+### Public Proof Page With Mainnet Verification
 
-![E - Public Proof Mainnet Verification](./docs/images/e-public-proof-mainnet-verification.png)
+![Public Proof Mainnet Verification](./docs/images/e-public-proof-mainnet-verification.png)
 
-This is the most important screen for judging. It shows the public proof record for the real mainnet proof packet.
+This is the main verification surface. It shows the public proof record for the real mainnet proof packet.
 
 Visible proof states:
 
@@ -254,9 +219,9 @@ Visible proof states:
 
 The transaction and proof object pills open Suiscan. The Walrus blob pill opens the app read proxy for the blob.
 
-### F. Create Grant Room
+### Create Grant Room
 
-![F - Create Grant Room](./docs/images/f-create-grant-room-mainnet-form.png)
+![Create Grant Room](./docs/images/f-create-grant-room-mainnet-form.png)
 
 This page creates the grant container. It captures:
 
@@ -270,9 +235,9 @@ This page creates the grant container. It captures:
 
 The form validates wallet addresses and required fields. When used live, metadata upload goes through the wallet-backed Walrus SDK flow, then the Sui create transaction is signed client-side.
 
-### G. Sponsor Review Queue
+### Sponsor Review Queue
 
-![G - Sponsor Review Queue](./docs/images/g-sponsor-review-queue.png)
+![Sponsor Review Queue](./docs/images/g-sponsor-review-queue.png)
 
 The review page lists pending Proof Packets. The reviewer can inspect proof, add review notes, upload a review packet to Walrus, and record a funding decision on Sui.
 
@@ -284,9 +249,9 @@ Review decisions:
 
 The contract records the reviewer wallet transparently. The UI does not pretend a private sponsor key exists on the server.
 
-### H. Infrastructure Status
+### Infrastructure Status
 
-![H - Infrastructure Status](./docs/images/h-infrastructure-status-live.png)
+![Infrastructure Status](./docs/images/h-infrastructure-status-live.png)
 
 The status page is the live integration proof panel.
 
@@ -303,9 +268,9 @@ It shows:
 
 This is where judges can quickly see whether the app is configured for real mainnet operations.
 
-### I. Dashboard With Mainnet Records
+### Dashboard With Mainnet Records
 
-![I - Dashboard Mainnet Records](./docs/images/i-dashboard-mainnet-records.png)
+![Dashboard With Mainnet Records](./docs/images/i-dashboard-mainnet-records.png)
 
 The dashboard shows the indexed Grant Rooms and proof counts. The displayed records are not empty placeholders. They include real mainnet seed records so the deployed app has public proof surfaces immediately.
 
@@ -319,7 +284,7 @@ Dashboard metrics:
 
 ---
 
-## Infographic: Proof Trail
+## Proof Trail
 
 ```mermaid
 flowchart LR
@@ -338,7 +303,7 @@ flowchart LR
   G -. "server-side RPC" .-> T["Tatum"]
 ```
 
-## Infographic: Trust Boundaries
+## Trust Boundaries
 
 ```mermaid
 flowchart TB
@@ -374,7 +339,7 @@ flowchart TB
   Health --> WalrusRead
 ```
 
-## Infographic: Data Placement
+## Data Placement
 
 ```mermaid
 flowchart TD
@@ -390,7 +355,7 @@ flowchart TD
   WalrusBlob -. stores .-> LargeData["large evidence and proof packet content"]
 ```
 
-## Infographic: Submit Proof State Machine
+## Submit Proof State Machine
 
 ```mermaid
 stateDiagram-v2
@@ -452,7 +417,7 @@ public/
   project assets, real mainnet record artifacts
 
 docs/
-  README screenshots and product walkthrough media
+  product walkthrough media
 ```
 
 Core client flow:
@@ -490,7 +455,7 @@ Client
 Grant proof usually includes files:
 
 - demo videos
-- screenshots
+- visual evidence
 - GitHub proof
 - deployment evidence
 - PDFs
@@ -668,63 +633,6 @@ Tests cover:
 
 ---
 
-## Local And Vercel Setup
-
-Install:
-
-```bash
-npm install
-```
-
-Create env file:
-
-```bash
-cp .env.example .env.local
-```
-
-Run locally:
-
-```bash
-npm run dev
-```
-
-Production build:
-
-```bash
-npm run build
-npm run start
-```
-
-### Required Environment Variables
-
-```env
-NEXT_PUBLIC_APP_NAME=WalProof
-
-NEXT_PUBLIC_SUI_NETWORK=mainnet
-NEXT_PUBLIC_TATUM_SUI_RPC_MAINNET=https://sui-mainnet.gateway.tatum.io
-NEXT_PUBLIC_TATUM_SUI_RPC_TESTNET=https://sui-testnet.gateway.tatum.io
-NEXT_PUBLIC_TATUM_SUI_RPC_DEVNET=https://sui-devnet.gateway.tatum.io
-
-TATUM_API_KEY=
-
-NEXT_PUBLIC_WALPROOF_PACKAGE_ID=0xcb2de9abb7cac5c70ff2e24854ff2595ce4087148329e32dacb0b9bceebe9a3e
-NEXT_PUBLIC_WALPROOF_REGISTRY_MODULE=registry
-
-NEXT_PUBLIC_WALRUS_NETWORK=mainnet
-WALRUS_PUBLISHER_URL=
-WALRUS_AGGREGATOR_URL=https://aggregator.walrus-mainnet.walrus.space
-WALRUS_UPLOAD_RELAY_URL=https://upload-relay.mainnet.walrus.space
-NEXT_PUBLIC_WALRUS_UPLOAD_RELAY_URL=https://upload-relay.mainnet.walrus.space
-
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-```
-
-For Vercel, set the same values in Project Settings -> Environment Variables. `TATUM_API_KEY` must be server-side only. Do not prefix it with `NEXT_PUBLIC_`.
-
----
-
 ## Move Build And Publish
 
 Use testnet before mainnet when changing contract code.
@@ -743,33 +651,6 @@ After publish:
 NEXT_PUBLIC_WALPROOF_PACKAGE_ID=0x...
 NEXT_PUBLIC_WALPROOF_REGISTRY_MODULE=registry
 ```
-
----
-
-## Demo Script
-
-This is the intended 2-3 minute judge demo.
-
-1. Open the landing page.
-2. Say: "WalProof is proof before payout for Web3 grants."
-3. Show the landing hero and the three integration pillars: Walrus, Tatum, Sui.
-4. Open `/status`.
-5. Show Tatum RPC online, mainnet checkpoint, chain identifier, Walrus relay/aggregator, and deployed package ID.
-6. Open `/dashboard`.
-7. Show the real mainnet Grant Rooms and Sui record count.
-8. Open `/proof/demo-proof`.
-9. Show the three verification cards:
-   - Stored on Walrus
-   - Registered on Sui
-   - Verified through Tatum
-10. Click the Walrus blob pill and show the proof packet JSON.
-11. Click the Sui transaction pill and show Suiscan mainnet transaction.
-12. Click the Sui proof object pill and show the `MilestoneProof` object.
-13. Open `/review`.
-14. Explain that live review uploads require a connected Sui wallet with SUI and WAL.
-15. End on: "WalProof does not pay grants. It proves work before payout."
-
----
 
 ## How A Real User Uses It
 
@@ -800,32 +681,6 @@ This is the intended 2-3 minute judge demo.
 4. Open Sui transaction and object.
 5. Confirm Tatum verification state.
 6. Inspect sponsor review outcome.
-
----
-
-## Supabase Position
-
-WalProof currently uses a local/seed metadata adapter for app indexing while keeping proof authority on Walrus and Sui mainnet.
-
-That is intentional for this submission:
-
-- public proof authority lives on Walrus and Sui
-- Tatum verifies chain state
-- the adapter makes the app immediately demoable after deployment
-- the adapter can be replaced by Supabase without changing the proof model
-
-Supabase is the natural production upgrade for:
-
-- multi-user grant indexes
-- organization dashboards
-- search
-- reviewer queues
-- profile and role metadata
-- cached event indexing
-
-Supabase is not required for the proof to be real. Walrus and Sui are the proof layers.
-
----
 
 ## Security Model
 
@@ -894,47 +749,6 @@ Manual integration checklist:
 
 ---
 
-## Known Limitations
-
-WalProof is mainnet-ready for proof registry behavior, but the following are intentionally scoped:
-
-- It is not an escrow and does not release funds.
-- Private encrypted evidence is not implemented yet.
-- Supabase persistence is not enabled by default.
-- Live Walrus uploads require wallet funds and user signatures.
-- Sponsor-only review enforcement is transparent at the UI/reviewer-wallet layer; the contract records reviewer address.
-- The dashboard includes real seeded mainnet records so deployed reviewers can inspect proof immediately.
-
----
-
-## Future Improvements
-
-- Supabase adapter with RLS policies
-- Sui event indexer for proof timelines
-- encrypted private evidence packets
-- sponsor organization roles
-- grant program templates
-- proof search by wallet, blob ID, object ID, and digest
-- richer Walrus blob previewer
-- optional payout-provider integration without custody
-
----
-
-## Hackathon Requirement Mapping
-
-| Requirement | WalProof Implementation |
-| --- | --- |
-| Use a Tatum API key | `TATUM_API_KEY` is used server-side in `/api/tatum-rpc`. |
-| Use Tatum Sui RPC nodes | Tatum mainnet endpoint verifies checkpoint, chain ID, transactions, and objects. |
-| Integrate Walrus storage meaningfully | Evidence and Proof Packets use Walrus blob storage and blob retrieval. |
-| Build on Sui mainnet | Default network is mainnet, with deployed package and real records. |
-| Professional GitHub repo | App, components, lib, API routes, Move package, docs, screenshots, README. |
-| 2-3 minute demo support | README includes exact demo script and public proof route. |
-| Make Walrus + Tatum visible | Landing, status, public proof, dashboard, and cards expose both integrations. |
-| Real app, not design mockup | Real Move contract, real package ID, real Walrus blob, real Tatum verification. |
-
----
-
 ## Final Summary
 
 WalProof is a grant proof registry built around a simple rule:
@@ -949,3 +763,11 @@ The app demonstrates that rule with real mainnet infrastructure:
 - Public proof pages expose the Verification Trail for sponsors, builders, and reviewers.
 
 WalProof does not pretend to be an escrow, a storage fake, or a local-only demo. It is a focused proof layer for Web3 grants: proof before payout.
+
+<p align="center">
+  <img src="./public/walproof-web/assets/walrus-w-transparent.png" alt="Walrus mark" width="72" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="./public/walproof-web/assets/tatum-transparent.png" alt="Tatum logo" width="132" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="./public/walproof-web/assets/sui-logo.svg" alt="Sui logo" width="72" />
+</p>
